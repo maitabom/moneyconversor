@@ -5,10 +5,44 @@
  * @format
  */
 
-import { StyleSheet, Text, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { PickerItem } from './src/components/picker';
+import { api } from './src/services/api';
+import CurrencyPicker from './src/model/currency_picker';
 
 function App() {
+  const [currenciesPicker, setCurrenciesPicker] = useState<CurrencyPicker[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadCurrency() {
+      const response = await api.get<any>('all');
+      let currencies: CurrencyPicker[] = [];
+
+      Object.keys(response.data).map(key => {
+        currencies.push({
+          key: key,
+          value: key,
+          label: key,
+        });
+      });
+
+      setCurrenciesPicker(currencies);
+    }
+
+    loadCurrency();
+    setLoading(false);
+  }, []);
+
+  if (loading) {
+    return (
+      <View style={styles.loading}>
+        <ActivityIndicator size="large" /> 
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.currencyArea}>
@@ -20,6 +54,11 @@ function App() {
 }
 
 const styles = StyleSheet.create({
+  loading: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center"
+  },
   container: {
     flex: 1,
     backgroundColor: '#101215',
